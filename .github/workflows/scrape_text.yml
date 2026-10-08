@@ -1,0 +1,29 @@
+name: Text Manifest Pull
+on:
+  workflow_dispatch: # Triggers the payload sequence manually with a single click
+
+jobs:
+  extract_stream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Map
+        uses: actions/checkout@v4
+
+      - name: Fetch Encrypted API Text Frame
+        run: |
+          # Query the site directly from the Microsoft/GitHub data center
+          curl -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" "https://www.instagram.com/" -o raw_feed.txt
+          
+          # Convert the data into a static Markdown document
+          echo "### Sync Complete" > instagram_manifest.md
+          echo "\`\`\`text" >> instagram_manifest.md
+          head -n 250 raw_feed.txt >> instagram_manifest.md
+          echo "\`\`\`" >> instagram_manifest.md
+
+      - name: Push Manifest Log to Repository
+        run: |
+          git config --global user.name "Automated Agent"
+          git config --global user.email "agent@github.com"
+          git add instagram_manifest.md
+          git commit -m "Update static payload log" || echo "Zero changes"
+          git push
